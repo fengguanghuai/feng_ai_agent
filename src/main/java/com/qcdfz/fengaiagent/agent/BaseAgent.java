@@ -70,17 +70,17 @@ public abstract class BaseAgent {
         // 保存结果列表
         List<String> results = new ArrayList<>();
         try {
-            for (int i = 0; i < maxSteps && state != AgentState.FINISHED; i++) {
+            for (int i = 0; i < maxSteps && state == AgentState.RUNNING; i++) {
                 int stepNumber = i + 1;
                 currentStep = stepNumber;
                 log.info("Executing step {}/{} ", stepNumber,maxSteps);
                 // 单步 执行
                 String stepResult = step();
-                String result = "Step " + stepNumber + ": " + stepResult;
+                String result = stepResult;
                 results.add(result);
             }
             // 检查是否超出步骤限制
-            if (currentStep >= maxSteps) {
+            if (state == AgentState.RUNNING && currentStep >= maxSteps) {
                 state = AgentState.FINISHED;
                 results.add("Terminated: Reached max steps (" + maxSteps + ")");
             }
@@ -88,7 +88,7 @@ public abstract class BaseAgent {
         } catch (Exception e) {
             state = AgentState.ERROR;
             log.error("Error executing agent", e);
-            return "执行错误" + e.getMessage();
+            return "通用助手执行失败，请稍后重试。";
         } finally {
             // 清理资源
             this.cleanup();
@@ -131,19 +131,19 @@ public abstract class BaseAgent {
             // 保存结果列表
             List<String> results = new ArrayList<>();
             try {
-                for (int i = 0; i < maxSteps && state != AgentState.FINISHED; i++) {
+                for (int i = 0; i < maxSteps && state == AgentState.RUNNING; i++) {
                     int stepNumber = i + 1;
                     currentStep = stepNumber;
                     log.info("Executing step {}/{} ", stepNumber,maxSteps);
                     // 单步 执行
                     String stepResult = step();
-                    String result = "Step " + stepNumber + ": " + stepResult;
+                    String result = stepResult;
                     results.add(result);
                     // 发送每一步的结果
-                    emitter.send(result);
+                    SseEmitterUtils.sendText(emitter, (stepNumber > 1 ? "\n\n" : "") + result);
                 }
                 // 检查是否超出步骤限制
-                if (currentStep >= maxSteps) {
+                if (state == AgentState.RUNNING && currentStep >= maxSteps) {
                     state = AgentState.FINISHED;
                     emitter.send("执行结束: 达到最大步骤  (" + maxSteps + ")");
 //                    results.add("Terminated: Reached max steps (" + maxSteps + ")");
@@ -154,8 +154,7 @@ public abstract class BaseAgent {
                 state = AgentState.ERROR;
                 log.error("执行智能体失败", e);
                 try {
-                    emitter.send("执行错误" + e.getMessage());
-                    SseEmitterUtils.completeWithDone(emitter);
+                    emitter.completeWithError(new IllegalStateException("通用助手执行失败，请稍后重试。"));
                 } catch (Exception ex) {
                     emitter.completeWithError(ex);
                 }

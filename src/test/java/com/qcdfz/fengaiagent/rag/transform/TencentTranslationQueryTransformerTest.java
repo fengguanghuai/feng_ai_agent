@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
+@org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable(named = "RUN_LEGACY_EXTERNAL_TESTS", matches = "true")
 class TencentTranslationQueryTransformerTest {
 
     @Resource
@@ -18,7 +19,7 @@ class TencentTranslationQueryTransformerTest {
                 .secretKey(globalApiKeyProperties.getTencent().getSecretKey())
                 .targetLang(TencentTranslateTargetLangEnum.EN.getValue())
                 .build();
-        String transform = build.transform("你好我是程序员：青春的疯子");
+        String transform = build.transform("你好我是程序员：测试用户");
         Assertions.assertNotNull(transform);
     }
 }

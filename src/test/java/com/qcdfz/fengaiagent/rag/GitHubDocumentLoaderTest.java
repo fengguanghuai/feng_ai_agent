@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @SpringBootTest
+@org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable(named = "RUN_LEGACY_EXTERNAL_TESTS", matches = "true")
 class GitHubDocumentLoaderTest {
     @Resource
     private GlobalApiKeyProperties globalApiKeyProperties;
@@ -29,8 +30,8 @@ class GitHubDocumentLoaderTest {
         GitHub github = new GitHubBuilder().withOAuthToken(token).build();
         GitHubDocumentLoader loader = GitHubDocumentLoader.builder()
                 .gitHub(github)
-                .owner("fenghuanghuai")
-                .repo("hell-world")
+                .owner("YOUR_GITHUB_ACCOUNT")
+                .repo("YOUR_REPOSITORY")
                 .branch("main")
                 .build();
 

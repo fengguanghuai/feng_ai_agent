@@ -77,7 +77,8 @@ CREATE TABLE IF NOT EXISTS `system_config`
   COLLATE = utf8mb4_unicode_ci COMMENT ='系统配置表';
 
 -- 用户表
-create table if not exists user
+-- Existing MySQL installations: RENAME TABLE user TO app_user before using this version.
+create table if not exists app_user
 (
     id           bigint auto_increment comment 'id' primary key,
     userAccount  varchar(256)                           not null comment '账号',

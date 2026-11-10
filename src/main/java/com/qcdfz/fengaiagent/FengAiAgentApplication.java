@@ -8,6 +8,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(
         exclude = {PgVectorStoreAutoConfiguration.class}
 )
+// The root rag package contains obsolete duplicates of the organized subpackages.
+@org.springframework.context.annotation.ComponentScan(
+        excludeFilters = @org.springframework.context.annotation.ComponentScan.Filter(
+                type = org.springframework.context.annotation.FilterType.REGEX,
+                pattern = "com\\.qcdfz\\.fengaiagent\\.rag\\.[^.]+"))
 @MapperScan("com.qcdfz.fengaiagent.mapper")
 public class FengAiAgentApplication {
 

@@ -3,7 +3,6 @@ package com.qcdfz.fengaiagent.advisor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.advisor.api.*;
 import org.springframework.ai.chat.model.MessageAggregator;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import reactor.core.publisher.Flux;
 
 /**
@@ -18,8 +17,9 @@ import reactor.core.publisher.Flux;
 public class MyLoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
 
     private AdvisedRequest before(AdvisedRequest request) {
-        String render = new PromptTemplate(request.userText(), request.userParams()).render();
-        log.info("user Prompt: {}", render);
+        // Logging must accept tool-only turns (null userText) and literal JSON/code braces.
+        // Never reinterpret user content as a template just to log it.
+        log.info("user Prompt: {}", request.userText());
         return request;
     }
 

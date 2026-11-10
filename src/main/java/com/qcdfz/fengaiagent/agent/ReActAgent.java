@@ -38,17 +38,10 @@ public abstract class ReActAgent extends BaseAgent{
      */
     @Override
     public String step() {
-        try {
-            boolean shouldAct = think();
-            if (!shouldAct){
-                return "思考完成 - 无需行动";
-            }
-            return act();
-        } catch (Exception e) {
-            // 记录异常日志
-            e.printStackTrace();
-            log.error("步骤执行失败:{}", e.getMessage());
-            return "步骤执行失败:" +e.getMessage();
+        if (!think()) {
+            setState(com.qcdfz.fengaiagent.agent.model.AgentState.FINISHED);
+            return getMessageList().getLast().getText();
         }
+        return act();
     }
 }

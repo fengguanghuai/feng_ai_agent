@@ -91,7 +91,7 @@ public class AiController {
         loveApp.doChatWithStream(message, chatId)
                 .subscribe(chunk -> {
                             try {
-                                emitter.send(chunk);
+                                SseEmitterUtils.sendText(emitter, chunk);
                             } catch (IOException e) {
                                 emitter.completeWithError(e);
                             }

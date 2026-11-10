@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.UUID;
 
+// Legacy demos can call paid models or send email; never run implicitly.
+@org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable(named = "RUN_LEGACY_EXTERNAL_TESTS", matches = "true")
 @SpringBootTest
 class LoveAppTest {
 
@@ -34,7 +36,7 @@ class LoveAppTest {
     void doChatWithReport() {
         String chatId = UUID.randomUUID().toString();
         // 第一轮
-        String message = "你好，我是青春的疯子，我想让另一半（小美）更爱我，但我不知道该怎么做";
+        String message = "你好，我是测试用户，我想让另一半（小美）更爱我，但我不知道该怎么做";
         LoveApp.LoveReport loveReport = loveApp.doChatWithReport(message, chatId);
         Assertions.assertNotNull(loveReport);
     }
@@ -77,7 +79,7 @@ class LoveAppTest {
     @Test
     void doChatWithTools2() {
         // 测试邮件发送
-        testMessage("我想发一封邮件给：qcdfz123451@2925.com ,内容是青春的疯子测试专用,用html格式发送，字体加粗");
+        testMessage("我想发一封邮件给：recipient1@example.invalid ,内容是测试用户测试专用,用html格式发送，字体加粗");
         testMessage("我想知道当前是什么时候，和两天前相差多少秒");
     }
     @Test

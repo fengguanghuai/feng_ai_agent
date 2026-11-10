@@ -15,7 +15,7 @@ import java.util.Date;
  * @createTime: 2025-05-17 21:30
  */
 @Data
-@TableName("user")
+@TableName("app_user")
 public class User {
 
     /**

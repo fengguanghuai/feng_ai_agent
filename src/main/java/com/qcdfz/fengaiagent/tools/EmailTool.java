@@ -25,6 +25,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
+@org.springframework.context.annotation.Profile("!supabase")
 public class EmailTool {
 
     @Resource

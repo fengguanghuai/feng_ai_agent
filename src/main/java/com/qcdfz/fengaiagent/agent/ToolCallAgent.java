@@ -2,7 +2,7 @@ package com.qcdfz.fengaiagent.agent;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import com.qcdfz.fengaiagent.agent.model.AgentState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -51,8 +51,9 @@ public class ToolCallAgent extends ReActAgent {
         this.availableTools = availableTools;
         this.toolCallingManager = ToolCallingManager.builder().build();
         // 禁用 Spring AI 内置的工具调用机制，自己维护选项和消息上下文
-        this.chatOptions = DashScopeChatOptions.builder()
-                .withProxyToolCalls(true)
+        this.chatOptions = ToolCallingChatOptions.builder()
+                .internalToolExecutionEnabled(false)
+                .toolCallbacks(availableTools)
                 .build();
     }
 
@@ -75,7 +76,6 @@ public class ToolCallAgent extends ReActAgent {
             // 获取带工具选项的响应
             ChatResponse chatResponse = getChatClient().prompt(prompt)
                     .system(getSystemPrompt())
-                    .tools(availableTools)
                     .call()
                     .chatResponse();
             // 记录响应，用于 Act
@@ -83,17 +83,11 @@ public class ToolCallAgent extends ReActAgent {
             // 解析工具调用结果，获取要调用的工具
             AssistantMessage assistantMessage = chatResponse.getResult().getOutput();
             // 输出提示信息
-            String result = assistantMessage.getText();
             List<AssistantMessage.ToolCall> toolCallList = assistantMessage.getToolCalls();
-            log.info("{}的思考:{}", getName(), result);
-            log.info("{}选择了{}个工具来使用", getName(), toolCallList.size());
-            String toolCallInfo = toolCallList.stream()
-                    .map(toolCall -> String.format("工具名称：%s，参数：%s",
-                            toolCall.name(),
-                            toolCall.arguments())
-                    )
-                    .collect(Collectors.joining("\n"));
-            log.info(toolCallInfo);
+            log.info("{} selected {} tools", getName(), toolCallList.size());
+            if (toolCallList.isEmpty() && StrUtil.isBlank(assistantMessage.getText())) {
+                throw new IllegalStateException("Model returned no answer or tool call");
+            }
             if (toolCallList.isEmpty()) {
                 // 只有不调用工具时，才记录助手消息
                 getMessageList().add(assistantMessage);
@@ -103,10 +97,7 @@ public class ToolCallAgent extends ReActAgent {
                 return true;
             }
         } catch (Exception e) {
-            log.error("{}的思考过程遇到了问题: {}", getName(), e.getMessage());
-            getMessageList().add(
-                    new AssistantMessage("处理时遇到错误: " + e.getMessage()));
-            return false;
+            throw new IllegalStateException("通用助手暂时无法回答，请稍后重试。", e);
         }
     }
 
@@ -136,7 +127,8 @@ public class ToolCallAgent extends ReActAgent {
         if (terminateToolCalled) {
             setState(AgentState.FINISHED);
         }
-        log.info(results);
-        return results;
+        // A model may include its actual answer alongside doTerminate; do not discard it.
+        String answer = toolCallChatResponse.getResult().getOutput().getText();
+        return StrUtil.isBlank(answer) ? results : answer + "\n\n" + results;
     }
 }

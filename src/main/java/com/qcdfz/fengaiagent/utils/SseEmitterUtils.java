@@ -7,6 +7,11 @@ import java.io.IOException;
 public class SseEmitterUtils {
     private static final String DONE_MESSAGE = "[DONE]";
 
+    /** EventSource strips one optional space after data:, so supply protocol padding. */
+    public static void sendText(SseEmitter emitter, String text) throws IOException {
+        emitter.send(SseEmitter.event().data(" " + text.replace("\n", "\n ")));
+    }
+
     /**
      * 完成SSE连接：发送结束标志并关闭连接
      *

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
  * @createTime: 2025-05-17 18:49
  */
 @Configuration
+@org.springframework.context.annotation.Profile("!supabase")
 public class ToolRegistration {
     @Value("${api-key.search-api-key}")
     private String searchApiKey;

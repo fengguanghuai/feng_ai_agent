@@ -9,6 +9,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+// Legacy demos can call paid models or send email; never run implicitly.
+@org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable(named = "RUN_LEGACY_EXTERNAL_TESTS", matches = "true")
 @SpringBootTest
 class EmailToolTest {
 
@@ -17,7 +19,7 @@ class EmailToolTest {
 
     @Test
     void sendSimpleEmail() {
-        String to = "qcdfz12345@2925.com";
+        String to = "recipient1@example.invalid";
         String subject = "测试邮件";
         String content = "这是一封测试邮件";
         String result = emailTool.sendSimpleEmail(to, subject, content);
@@ -26,7 +28,7 @@ class EmailToolTest {
 
     @Test
     void sendHtmlEmail() {
-        String to = "qcdfz12345@2925.com";
+        String to = "recipient2@example.invalid";
         String subject = "HTML测试邮件";
         String htmlContent = "<h1>这是一封HTML测试邮件</h1><p>Hello World!</p>";
         String result = emailTool.sendHtmlEmail(to, subject, htmlContent);
@@ -35,7 +37,7 @@ class EmailToolTest {
 
     @Test
     void sendBatchEmails() {
-        List<String> toList = Arrays.asList("qcdfz12345@2925.com","qcdfz123451@2925.com");
+        List<String> toList = Arrays.asList("recipient3@example.invalid","recipient4@example.invalid");
         String subject = "批量测试邮件";
         String content = "这是一封批量测试邮件";
         String result = emailTool.sendBatchEmails(toList, subject, content);

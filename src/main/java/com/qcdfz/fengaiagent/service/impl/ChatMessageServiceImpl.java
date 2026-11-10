@@ -19,16 +19,20 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
 
     @Override
     public List<ChatMessage> findLatestMessages(String conversationId, int limit) {
-        // 只根据conversationId查询，不涉及messageType
+        if (limit <= 0) {
+            return List.of();
+        }
+        // Retrieve the newest window, then return it in conversational order.
         return this.lambdaQuery()
                 .eq(ChatMessage::getConversationId, conversationId)
-                .last("limit " + limit)
-                .list();
+                .orderByDesc(ChatMessage::getId)
+                .last("limit " + Math.min(limit, 100))
+                .list().reversed();
     }
 
     @Override
     public Boolean deleteByConversationId(String conversationId) {
-        return this.remove(lambdaQuery().eq(ChatMessage::getConversationId,conversationId));
+        return this.lambdaUpdate().eq(ChatMessage::getConversationId, conversationId).remove();
     }
 }
 

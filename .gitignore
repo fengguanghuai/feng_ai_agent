@@ -1,4 +1,8 @@
 ###Custom###
+.env
+.env.*
+!.env.example
+*.log
 application-local.yml
 application-pro.yml
 .cursor

@@ -7,6 +7,15 @@
 [![Vue](https://img.shields.io/badge/Vue-3.4.29-4FC08D.svg)](https://vuejs.org/)
 [![License](https://img.shields.io/badge/License-学习使用-blue.svg)](#)
 
+## 当前本机版本
+
+当前 `supabase` 配置使用 **DeepSeek + Supabase + 本地知识库**，九篇资料随代码保存，不需要百炼或 embedding 密钥；也可显式切换百炼检索。
+
+- [本机启动与功能边界](docs/supabase-deepseek.md)
+- [本地知识库配置、资料维护与来源](docs/local-knowledge.md)
+
+以下保留原项目架构与历史示例，不代表当前配置开放了邮件、终端、联网搜索或 MCP 工具。代码中的占位配置不可当作真实凭据；不要直接运行历史全量外部工具测试。
+
 ## 📋 项目简介
 
 本项目是一个基于Spring Boot 3.4.4和Java 21开发的智能AI Agent系统，集成了多种主流AI服务提供商的能力，包括阿里云百炼、火山引擎、Ollama等。系统提供了丰富的工具集成、RAG检索增强生成、对话管理、以及MCP协议支持等功能。
@@ -89,8 +98,9 @@ feng-ai-agent/
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/fenghuanghuai/feng_ai_agent.git
-cd feng-ai-agent
+# 将 YOUR_GITHUB_ACCOUNT 替换为实际仓库所属账号
+git clone https://github.com/YOUR_GITHUB_ACCOUNT/feng_ai_agent.git
+cd feng_ai_agent
 ```
 
 ### 2. 配置数据库
