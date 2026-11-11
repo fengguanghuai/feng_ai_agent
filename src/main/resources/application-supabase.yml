@@ -1,0 +1,68 @@
+# Activate with --spring.profiles.active=supabase. Secrets stay outside the repository.
+spring:
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.ai.autoconfigure.dashscope.DashScopeAutoConfiguration
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SUPABASE_JDBC_URL}
+    username: ${SUPABASE_DB_USER}
+    password: ${SUPABASE_DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+  ai:
+    openai:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      chat:
+        options:
+          model: ${DEEPSEEK_MODEL:deepseek-flash}
+      embedding:
+        enabled: false
+      image:
+        enabled: false
+      audio:
+        transcription:
+          enabled: false
+        speech:
+          enabled: false
+      moderation:
+        enabled: false
+    dashscope:
+      image:
+        enabled: false
+      chat:
+        enabled: false
+      embedding:
+        enabled: false
+    ollama:
+      chat:
+        enabled: false
+      embedding:
+        enabled: false
+      init:
+        pull-model-strategy: never
+    mcp:
+      client:
+        enabled: false
+app:
+  rag:
+    enabled: ${RAG_ENABLED:${BAILIAN_RAG_ENABLED:true}}
+    provider: ${RAG_PROVIDER:local}
+    local:
+      location: ${RAG_LOCAL_LOCATION:classpath:knowledge/*.md}
+      top-k: ${RAG_LOCAL_TOP_K:5}
+    api-key: ${BAILIAN_API_KEY:}
+    base-url: ${BAILIAN_BASE_URL:https://dashscope.aliyuncs.com}
+    index-name: 恋爱大师
+server:
+  address: 127.0.0.1
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+# Do not log private relationship conversations by default.
+logging:
+  level:
+    com.qcdfz.fengaiagent.advisor.MyLoggerAdvisor: "OFF"
+    com.qcdfz.fengaiagent.app.LoveApp: WARN

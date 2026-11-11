@@ -1,0 +1,23 @@
+package com.qcdfz.fengaiagent;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.ai.autoconfigure.vectorstore.pgvector.PgVectorStoreAutoConfiguration;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication(
+        exclude = {PgVectorStoreAutoConfiguration.class}
+)
+// The root rag package contains obsolete duplicates of the organized subpackages.
+@org.springframework.context.annotation.ComponentScan(
+        excludeFilters = @org.springframework.context.annotation.ComponentScan.Filter(
+                type = org.springframework.context.annotation.FilterType.REGEX,
+                pattern = "com\\.qcdfz\\.fengaiagent\\.rag\\.[^.]+"))
+@MapperScan("com.qcdfz.fengaiagent.mapper")
+public class FengAiAgentApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(FengAiAgentApplication.class, args);
+    }
+
+}
