@@ -30,11 +30,11 @@ public class ToolRegistration {
 
     @Bean
     public ToolCallback[] allTools() {
+        // 不再注册终端工具：模型参数可能被网页内容注入，任意命令执行风险过高
         FileOperationTool fileOperationTool = new FileOperationTool();
         WebSearchTool webSearchTool = new WebSearchTool(searchApiKey);
         WebScrapingTool webScrapingTool = new WebScrapingTool();
         ResourceDownloadTool resourceDownloadTool = new ResourceDownloadTool();
-        TerminalOperationTool terminalOperationTool = new TerminalOperationTool();
         PDFGenerationTool pdfGenerationTool = new PDFGenerationTool();
         TerminateTool terminateTool = new TerminateTool();
         TimeTool timeTool = new TimeTool();
@@ -43,7 +43,6 @@ public class ToolRegistration {
                 webSearchTool,
                 webScrapingTool,
                 resourceDownloadTool,
-                terminalOperationTool,
                 pdfGenerationTool,
                 emailTool,
                 timeTool,

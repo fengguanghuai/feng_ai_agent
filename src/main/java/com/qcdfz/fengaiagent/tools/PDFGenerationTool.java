@@ -16,6 +16,8 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.net.URL;
@@ -42,7 +44,12 @@ public class PDFGenerationTool {
         // 过滤文件名中的非法字符，保证Windows下合法
         fileName = fileName.replaceAll("[\\\\/:*?\"<>|]", "_");
         String fileDir = FileConstant.FILE_SAVE_DIR + "/pdf";
-        String filePath = fileDir + "/" + fileName;
+        String filePath;
+        try {
+            filePath = ToolSafety.resolveInside(fileDir, fileName).toString();
+        } catch (IllegalArgumentException e) {
+            return "Error generating PDF: " + e.getMessage();
+        }
         try {
             // 创建目录
             FileUtil.mkdir(fileDir);
@@ -89,7 +96,14 @@ public class PDFGenerationTool {
                             }
                         } else if (StrUtil.isNotBlank(url) && url.startsWith("file:")) {
                             try {
-                                ImageData imageData = ImageDataFactory.create(url);
+                                // 本地图片只允许来自工具目录（例如下载工具保存的文件），防止把任意本机文件嵌进 PDF
+                                Path local = Path.of(URI.create(url)).toAbsolutePath().normalize();
+                                Path allowed = Path.of(FileConstant.FILE_SAVE_DIR).toAbsolutePath().normalize();
+                                if (!local.startsWith(allowed)) {
+                                    document.add(new Paragraph("不允许使用工具目录之外的本地图片: " + url));
+                                    continue;
+                                }
+                                ImageData imageData = ImageDataFactory.create(local.toString());
                                 Image image = new Image(imageData);
                                 image.setAutoScale(true);
                                 document.add(image);
@@ -117,6 +131,7 @@ public class PDFGenerationTool {
      * @return 本地图片文件路径
      */
     private String downloadImageWithUserAgent(String imageUrl) throws IOException {
+        ToolSafety.requirePublicHttpUrl(imageUrl);
         // 只取最后一个.到?或结尾之间的内容作为后缀，过滤非法字符
         String suffix = ".jpg";
         int dotIdx = imageUrl.lastIndexOf('.');
@@ -136,6 +151,8 @@ public class PDFGenerationTool {
         cn.hutool.core.io.FileUtil.writeFromStream(
                 cn.hutool.http.HttpUtil.createGet(imageUrl)
                         .header("User-Agent", "Mozilla/5.0")
+                        .setFollowRedirects(false)
+                        .timeout(15_000)
                         .execute()
                         .bodyStream(),
                 tempFilePath
