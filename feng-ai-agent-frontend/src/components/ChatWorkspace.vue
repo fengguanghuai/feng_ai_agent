@@ -1,9 +1,10 @@
 <script setup>
 import { computed, h, nextTick, ref, watch } from 'vue'
-import { Bubble, Sender } from 'ant-design-x-vue'
+import { Bubble, Conversations, Sender, ThoughtChain } from 'ant-design-x-vue'
 import AppIcon from './AppIcon.vue'
 import { conversations, useConversation } from '../composables/useConversation'
 import { renderMarkdown } from '../services/markdown'
+import { parseAssistantMessage } from '../services/thoughtChain'
 
 const props = defineProps({ mode: { type: String, default: 'love' } })
 const isLove = computed(() => props.mode === 'love')
@@ -11,6 +12,12 @@ const { current, draft, pending, error, send, stop, newConversation, selectConve
 
 const title = computed(() => isLove.value ? 'AI 恋爱大师' : 'Manus 通用助手')
 const history = computed(() => conversations.value.filter(item => item.mode === props.mode && item.messages.length))
+const conversationItems = computed(() => history.value.map(thread => ({
+  key: thread.id,
+  label: thread.title,
+  icon: h(AppIcon, { name: 'chat', size: 15 }),
+  disabled: pending.value,
+})))
 
 const sender = ref(null)
 const scrollArea = ref(null)
@@ -80,10 +87,33 @@ watch(() => props.mode, () => {
   showInfo.value = false
 })
 
-function renderContent(content, role) {
-  return role === 'assistant'
-    ? h('div', { class: 'message-markdown', innerHTML: renderMarkdown(content) })
-    : h('div', { class: 'user-text' }, content)
+function getParsedAssistant(item) {
+  if (item.role !== 'assistant' || isLove.value) {
+    return { steps: [], body: item.content }
+  }
+  return parseAssistantMessage(item.content)
+}
+
+function buildThoughtItems(steps, status, hasBody) {
+  const items = steps.map(step => ({
+    key: step.key,
+    title: step.title,
+    description: step.description,
+    status: step.status,
+    collapsible: Boolean(step.result),
+    content: step.result
+      ? h('pre', { class: 'tool-result-pre' }, step.result)
+      : undefined,
+  }))
+  if (status === 'streaming' && !hasBody) {
+    items.push({
+      key: 'generating-answer',
+      title: '正在结合工具结果生成回答…',
+      status: 'loading',
+      blink: true,
+    })
+  }
+  return items
 }
 
 async function copyMessage(item) {
@@ -161,20 +191,13 @@ async function copyMessage(item) {
       <section class="history-section" aria-label="本次访问的对话">
         <div class="nav-label">本次访问 <span>{{ history.length }}</span></div>
         <p v-if="!history.length" class="history-empty">从一个小问题开始，<br />你的对话会出现在这里。</p>
-        <div v-else class="history-list">
-          <button
-            v-for="thread in history"
-            :key="thread.id"
-            type="button"
-            :class="{ active: thread.id === current.id }"
-            :disabled="pending"
-            :title="thread.title"
-            @click="handleSelectThread(thread.id)"
-          >
-            <AppIcon name="chat" :size="15" />
-            <span>{{ thread.title }}</span>
-          </button>
-        </div>
+        <Conversations
+          v-else
+          class="history-conversations"
+          :items="conversationItems"
+          :active-key="current?.id"
+          @active-change="handleSelectThread"
+        />
       </section>
 
       <div class="sidebar-note">
@@ -301,14 +324,29 @@ async function copyMessage(item) {
           </div>
           <article v-for="item in current.messages" :key="item.id" class="message-row" :class="item.role">
             <Bubble
-              :content="item.content"
+              :content="item.role === 'assistant' ? getParsedAssistant(item).body : item.content"
               :placement="item.role === 'user' ? 'end' : 'start'"
               :variant="item.role === 'user' ? 'filled' : 'borderless'"
               :loading="item.status === 'streaming' && !item.content"
               :streaming="item.status === 'streaming'"
-              :content-render="content => renderContent(content, item.role)"
               :styles="{ content: { maxWidth: '100%' } }"
             >
+              <template #content>
+                <div v-if="item.role === 'user'" class="user-text">{{ item.content }}</div>
+                <div v-else class="assistant-structured">
+                  <div v-if="getParsedAssistant(item).steps.length" class="thought-chain-wrap">
+                    <ThoughtChain
+                      :items="buildThoughtItems(getParsedAssistant(item).steps, item.status, Boolean(getParsedAssistant(item).body))"
+                      line="dashed"
+                    />
+                  </div>
+                  <div
+                    v-if="getParsedAssistant(item).body"
+                    class="message-markdown"
+                    v-html="renderMarkdown(getParsedAssistant(item).body)"
+                  ></div>
+                </div>
+              </template>
               <template #avatar>
                 <span class="message-avatar" :class="item.role">
                   <AppIcon v-if="item.role === 'assistant'" :name="isLove ? 'heart' : 'spark'" :size="17" />

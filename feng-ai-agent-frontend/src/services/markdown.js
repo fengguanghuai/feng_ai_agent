@@ -8,4 +8,9 @@ markdown.renderer.rules.link_open = (tokens, idx, options, env, self) => {
 }
 // No remote image loads from model output: don't leak browser network data through Markdown.
 markdown.renderer.rules.image = (tokens, idx) => markdown.utils.escapeHtml(tokens[idx].content || '图片')
-export const renderMarkdown = (text) => markdown.render(String(text || ''))
+export const renderMarkdown = (text) => {
+  const normalized = String(text || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n[ \t]*\n+/g, '\n\n')
+  return markdown.render(normalized)
+}
