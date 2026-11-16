@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "api-key")
 public class GlobalApiKeyProperties {
     private String dashscope;
-    private String volcengine;
     private String github;
     private Tencent tencent = new Tencent();
 

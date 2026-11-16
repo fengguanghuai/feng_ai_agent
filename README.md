@@ -18,11 +18,11 @@
 
 ## 📋 项目简介
 
-本项目是一个基于Spring Boot 3.4.4和Java 21开发的智能AI Agent系统，集成了多种主流AI服务提供商的能力，包括阿里云百炼、火山引擎、Ollama等。系统提供了丰富的工具集成、RAG检索增强生成、对话管理、以及MCP协议支持等功能。
+本项目是一个基于Spring Boot 3.4.4和Java 21开发的智能AI Agent系统，集成了阿里云百炼与 DeepSeek（OpenAI 兼容接口）等模型服务。系统提供了丰富的工具集成、RAG检索增强生成、对话管理、以及MCP协议支持等功能。
 
 ### ✨ 核心特性
 
-- 🧠 **多AI服务集成**：支持阿里云百炼、火山引擎、Ollama等多种AI服务
+- 🧠 **多AI服务集成**：支持阿里云百炼、DeepSeek 等模型服务
 - 🔧 **丰富工具集成**：内置邮件发送、PDF生成、网页搜索、文件操作等多种工具
 - 📚 **RAG检索增强**：基于PGVector的向量存储，支持文档检索增强生成
 - 💬 **智能对话管理**：支持多轮对话、对话历史管理、上下文保持
@@ -46,7 +46,7 @@
 - **开发语言**：Java 21
 - **数据库**：MySQL + PostgreSQL (向量存储)
 - **ORM框架**：MyBatis-Plus 3.5.12
-- **AI集成**：Spring AI + 阿里云百炼 + 火山引擎 + Ollama
+- **AI集成**：Spring AI + 阿里云百炼 + DeepSeek
 - **工具库**：Hutool、Lombok
 - **API文档**：Knife4j
 - **序列化**：Kryo
@@ -59,10 +59,10 @@
 - **构建工具**：Vite 5.3.1
 
 ### AI服务集成
-- **阿里云百炼**：DashScope SDK
-- **火山引擎**：Volcengine SDK
-- **本地模型**：Ollama集成
-- **LangChain4j**：社区版DashScope支持
+- **阿里云百炼**：Spring AI Alibaba / DashScope SDK
+- **DeepSeek**：Spring AI OpenAI 兼容接口
+
+早期的火山引擎、Ollama、LangChain4j 调用示例（`demo` 包）已移除，可在 Git 历史中查看。
 
 ## 🏗️ 项目架构
 

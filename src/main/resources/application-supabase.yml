@@ -36,13 +36,6 @@ spring:
         enabled: false
       embedding:
         enabled: false
-    ollama:
-      chat:
-        enabled: false
-      embedding:
-        enabled: false
-      init:
-        pull-model-strategy: never
     mcp:
       client:
         enabled: false

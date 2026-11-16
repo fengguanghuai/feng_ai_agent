@@ -4,10 +4,6 @@ spring:
   profiles:
     active: pro
   ai:
-    ollama:
-      base-url: http://localhost:11434
-      chat:
-        model: deepseek-r1:1.5b
 #    mcp:
 #      client:
 #        sse:
@@ -88,7 +84,6 @@ mybatis-plus:
 #api-key:
 #  github: xxx
 #  dashscope: xxx
-#  volcengine: xxx
 #  tencent:
 #    secret-id: xxx
 #    secret-key: xxx
